@@ -92,7 +92,7 @@ export const StringComponent: FC = () => {
 
 	return (
 		<SolutionLayout title="Строка">
-			<form action="" onSubmit={onSubmit}>
+			<form action="" onSubmit={onSubmit} data-testid="stringComponent">
 				<div className={styles.form}>
 					<Input
 						maxLength={11}
