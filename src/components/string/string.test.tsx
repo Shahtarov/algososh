@@ -1,28 +1,86 @@
+import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { StringComponent } from "./string";
 
-describe("String revers algo", () => {
-	it("with an even number of characters", async () => {
-		// expect(StringComponent("test")).toEqual("tset");
-		render(<StringComponent />);
-		const stringComponent = screen.getByTestId("stringComponent");
+describe("String reversComponent", () => {
+	it("even", async () => {
+		render(
+			<MemoryRouter>
+				<StringComponent />
+			</MemoryRouter>
+		);
+		const input = screen.getByRole("textbox");
+		const button = screen.getByRole("button", { name: "Развернуть" });
 
-		const input = screen.getByRole("input");
-		fireEvent.input(input, {
-			target: {
-				value: "1234"
-			}
-		});
-
-		const btn = screen.getByRole("button");
-		fireEvent.click(btn);
+		fireEvent.change(input, { target: { value: "12" } });
+		fireEvent.click(button);
 
 		await waitFor(() => {
-			const circleElements = screen.getAllByTestId("circle");
-			const reversedString = Array.from(circleElements)
-				.map((circle) => circle.textContent)
-				.join("");
-			expect(reversedString).toEqual("4321");
+			const circles = screen.getAllByTestId("circle");
+
+			const letters = circles.map((circle) => circle.textContent).join("");
+			expect(letters).toBe("21");
+		});
+	});
+
+	it("odd", async () => {
+		render(
+			<MemoryRouter>
+				<StringComponent />
+			</MemoryRouter>
+		);
+		const input = screen.getByRole("textbox");
+		const button = screen.getByRole("button", { name: "Развернуть" });
+
+		fireEvent.change(input, { target: { value: "123" } });
+		fireEvent.click(button);
+
+		await waitFor(() => {
+			const circles = screen.getAllByTestId("circle");
+			const letters = circles.map((circle) => circle.textContent).join("");
+
+			expect(letters).toBe("321");
+		});
+	});
+
+	it("one symbol", async () => {
+		render(
+			<MemoryRouter>
+				<StringComponent />
+			</MemoryRouter>
+		);
+		const input = screen.getByRole("textbox");
+		const button = screen.getByRole("button", { name: "Развернуть" });
+
+		fireEvent.change(input, { target: { value: "1" } });
+		fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(button).not.toBeDisabled();
+		});
+
+		await waitFor(() => {
+			const circles = screen.getAllByTestId("circle");
+			const letters = circles.map((circle) => circle.textContent).join("");
+			expect(letters).toBe("1");
+		});
+	});
+
+	it("empty string", async () => {
+		render(
+			<MemoryRouter>
+				<StringComponent />
+			</MemoryRouter>
+		);
+		const input = screen.getByRole("textbox");
+		const button = screen.getByRole("button", { name: "Развернуть" });
+		const circle = screen.queryByTestId("circle");
+		fireEvent.change(input, { target: { value: "" } });
+		fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(circle).toBeNull();
 		});
 	});
 });
