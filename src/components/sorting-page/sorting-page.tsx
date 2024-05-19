@@ -8,99 +8,132 @@ import { ElementStates } from "../../types/element-states";
 import styles from "./sorting-page.module.css";
 import { swap } from "../../utils/swap";
 
-interface IArrayItem {
+const randomArr = (minLen: number = 3, maxLen: number = 17): number[] => {
+	const length = Math.max(minLen, Math.floor(Math.random() * maxLen));
+	return Array.from({ length: length }, () => Math.floor(Math.random() * 100));
+};
+
+interface IItem {
 	data: number;
 	state: ElementStates;
 }
 
+const cmp = (sortType: string, first: number, second: number): boolean => {
+	if (sortType === "asc") {
+		return first < second;
+	} else if (sortType === "desc") {
+		return first > second;
+	} else {
+		console.log("cmp error sortType", sortType);
+		return false;
+	}
+};
+
+export const sortAlgo = (
+	array: IItem[],
+	algoType: string,
+	sortType: string
+): IItem[] => {
+	const newArray = array.slice();
+	if (algoType === "selection") {
+		for (let i = 0; i < newArray.length; i++) {
+			let idx = i;
+			for (let j = i + 1; j < newArray.length; j++) {
+				if (cmp(sortType, newArray[j].data, newArray[idx].data)) {
+					idx = j;
+				}
+			}
+			swap(newArray, i, idx);
+		}
+	} else if (algoType === "bubble") {
+		for (let i = 0; i < newArray.length; i++) {
+			for (let j = 0; j < newArray.length - i - 1; j++) {
+				if (cmp(sortType, newArray[j + 1].data, newArray[j].data)) {
+					swap(newArray, j, j + 1);
+				}
+			}
+		}
+	}
+	return newArray;
+};
+
 export const SortingPage: FC = () => {
-	const [isLoading, setIsLoading] = useState<boolean>(false);
-
-	const generateRandomArray = (
-		minLength: number = 3,
-		maxLength: number = 17
-	): number[] => {
-		const length = Math.max(minLength, Math.floor(Math.random() * maxLength));
-		return Array.from({ length }, () => Math.floor(Math.random() * 100));
-	};
-
-	const [animatedArray, setAnimatedArray] = useState<IArrayItem[]>(
-		generateRandomArray().map((item) => ({
-			data: item,
-			state: ElementStates.Default
-		}))
+	const [isLoader, setIsLoader] = useState<boolean>(false);
+	const [arrayToAnimate, setArrayToAnimate] = useState<IItem[]>(
+		randomArr().map((item) => {
+			return {
+				data: item,
+				state: ElementStates.Default
+			};
+		})
 	);
+	const [answer, setAnswer] = useState<IItem[]>(arrayToAnimate);
 
-	const [sortingOrder, setSortingOrder] = useState<string>("");
-	const [sortingAlgorithm, setSortingAlgorithm] =
-		useState<string>("selection");
-	const [currentIndex, setCurrentIndex] = useState<number>(0);
+	const [sortType, setSortType] = useState<string>(""); // asc / desc
+	const [sortAlgoType, setSortAlgoType] = useState<string>("selection"); // selection / bubble
+	const [sortIndex, setSortIndex] = useState<number>(0);
 	const [i, setI] = useState<number>(0);
 	const [j, setJ] = useState<number>(0);
 
-	const compare = (first: number, second: number) => {
-		if (sortingOrder === "asc") {
-			return first < second;
-		} else if (sortingOrder === "desc") {
-			return first > second;
-		} else {
-			console.error("Invalid sorting order:", sortingOrder);
-		}
-	};
-
-	const handleClick = (type: string) => {
+	const onClick = (type: string) => {
 		if (["selection", "bubble"].includes(type)) {
-			setSortingAlgorithm(type);
+			setSortAlgoType(type);
 		} else if (["asc", "desc"].includes(type)) {
-			if (sortingAlgorithm === "selection") {
+			if (sortAlgoType === "selection") {
 				setI(0);
 				setJ(1);
-			} else if (sortingAlgorithm === "bubble") {
+			} else if (sortAlgoType === "bubble") {
 				setI(0);
 				setJ(0);
 			}
-			setAnimatedArray(
-				animatedArray.map((item) => ({
-					data: item.data,
-					state: ElementStates.Default
-				}))
+			setArrayToAnimate(
+				arrayToAnimate.map((item) => {
+					return {
+						data: item.data,
+						state: ElementStates.Default
+					};
+				})
 			);
-			setSortingOrder(type);
-			setIsLoading(true);
+			setSortType(type);
+			setIsLoader(true);
+			setAnswer(sortAlgo(arrayToAnimate, sortAlgoType, type));
 		} else if (type === "newArray") {
-			setIsLoading(false);
-			setAnimatedArray(
-				generateRandomArray().map((item) => ({
-					data: item,
-					state: ElementStates.Default
-				}))
+			setIsLoader(false);
+			setArrayToAnimate(
+				randomArr().map((item) => {
+					return {
+						data: item,
+						state: ElementStates.Default
+					};
+				})
 			);
 		} else {
-			console.error("Invalid action type:", type);
+			console.log("Error onClick", type);
 		}
 	};
 
-	const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+	const onSubmit = (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		let selectedAlgorithm: string | null = null;
+
+		let sortAlgo: string | null = null;
 		const radios = document.getElementsByName("sortType");
 		for (let i = 0; i < radios.length; i++) {
-			const radioBtn = radios[i] as HTMLInputElement;
-			if (radioBtn.checked) {
-				selectedAlgorithm = radioBtn.value;
+			const btn = radios[i] as HTMLInputElement;
+			if (btn.checked) {
+				sortAlgo = btn.value;
 			}
 		}
-		setSortingAlgorithm(selectedAlgorithm ?? "selection");
+		setSortAlgoType(sortAlgo ?? "selection");
 	};
 
-	const bubbleSortStep = (array: IArrayItem[]) => {
+	const bubbleSortAnimationStep = (array: IItem[]) => {
 		if (j > 0) {
 			array[j - 1].state = ElementStates.Default;
 			array[j].state = ElementStates.Default;
 		}
 
-		if (compare(array[j + 1].data, array[j].data)) {
-			swap<number>(array, j, j + 1);
+		if (cmp(sortType, array[j + 1].data, array[j].data)) {
+			swap(array, j, j + 1);
 		}
 		array[j].state = ElementStates.Changing;
 		array[j + 1].state = ElementStates.Changing;
@@ -108,7 +141,7 @@ export const SortingPage: FC = () => {
 		if (i + 1 === array.length) {
 			array[j].state = ElementStates.Modified;
 			array[j + 1].state = ElementStates.Modified;
-			setIsLoading(false);
+			setIsLoader(false);
 			setI(0);
 			setJ(0);
 		} else if (j + 1 === array.length - i - 1) {
@@ -121,30 +154,34 @@ export const SortingPage: FC = () => {
 		}
 	};
 
-	const selectionSortStep = (array: IArrayItem[]) => {
-		array[j - 1].state = ElementStates.Default;
+	const selectionSortAnimationStep = (array: IItem[]) => {
+		if (j > 0) {
+			array[j - 1].state = ElementStates.Default;
+		}
 		array[i].state = ElementStates.Changing;
 
 		if (j < array.length) {
 			array[j].state = ElementStates.Changing;
 
-			if (j === i + 1 || compare(array[j].data, array[currentIndex].data)) {
-				setCurrentIndex(j);
+			if (
+				j === i + 1 ||
+				cmp(sortType, array[j].data, array[sortIndex].data)
+			) {
+				setSortIndex(j);
 			}
 		}
 
 		if (i + 1 === array.length) {
 			array[i].state = ElementStates.Modified;
-			setIsLoading(false);
+			setIsLoader(false);
 			setI(0);
 			setJ(1);
 		} else if (j > array.length - 1) {
 			array[i].state = ElementStates.Modified;
-			if (compare(array[currentIndex].data, array[i].data)) {
-				swap(array, currentIndex, i);
+			if (cmp(sortType, array[sortIndex].data, array[i].data)) {
+				swap(array, sortIndex, i);
 			}
-
-			setCurrentIndex(i + 1);
+			setSortIndex(i + 1);
 			setJ(i + 2);
 			setI(i + 1);
 		} else {
@@ -154,22 +191,20 @@ export const SortingPage: FC = () => {
 
 	useEffect(() => {
 		const interval = setInterval(() => {
-			if (isLoading) {
-				if (true) {
-					const arrayCopy: IArrayItem[] = animatedArray.slice();
-					if (sortingAlgorithm === "bubble") {
-						bubbleSortStep(arrayCopy);
-					} else if (sortingAlgorithm === "selection") {
-						selectionSortStep(arrayCopy);
-					}
-					setAnimatedArray(arrayCopy);
+			if (isLoader) {
+				const array: IItem[] = arrayToAnimate.slice();
+				if (sortAlgoType === "bubble") {
+					bubbleSortAnimationStep(array);
+				} else if (sortAlgoType === "selection") {
+					selectionSortAnimationStep(array);
 				}
+				setArrayToAnimate(array);
 			} else {
-				setIsLoading(false);
-				if (sortingAlgorithm === "selection") {
+				setIsLoader(false);
+				if (sortAlgoType === "selection") {
 					setI(0);
 					setJ(1);
-				} else if (sortingAlgorithm === "bubble") {
+				} else if (sortAlgoType === "bubble") {
 					setI(0);
 					setJ(0);
 				}
@@ -179,73 +214,85 @@ export const SortingPage: FC = () => {
 		return () => {
 			clearInterval(interval);
 		};
-	}, [isLoading, animatedArray, i, j]);
+	}, [isLoader, arrayToAnimate, i, j, sortAlgoType, answer, sortType]);
 
 	return (
 		<SolutionLayout title="Сортировка массива">
-			<form className={styles.form} action="" onSubmit={handleSubmit}>
+			<form className={styles.form} onSubmit={onSubmit}>
 				<div className={styles.switcher}>
 					<RadioInput
 						label={"Выбор"}
 						name={"sortType"}
 						value={"selection"}
-						checked={sortingAlgorithm === "selection"}
+						checked={sortAlgoType === "selection"}
 						onChange={() => {
-							handleClick("selection");
+							onClick("selection");
 						}}
-						disabled={isLoading}
-					/>
+						disabled={isLoader}
+					></RadioInput>
 					<RadioInput
 						label={"Пузырёк"}
 						name={"sortType"}
 						value={"bubble"}
-						checked={sortingAlgorithm === "bubble"}
+						checked={sortAlgoType === "bubble"}
 						onChange={() => {
-							handleClick("bubble");
+							onClick("bubble");
 						}}
-						disabled={isLoading}
-					/>
+						disabled={isLoader}
+					></RadioInput>
 				</div>
 				<div className={styles.directions}>
-					<Button
-						id={"asc"}
-						type="submit"
-						text={"По возрастанию"}
-						sorting={Direction.Ascending}
-						name={"asc"}
-						value={"asc"}
-						isLoader={isLoading && sortingOrder === "asc"}
-						disabled={isLoading}
-						onClick={() => handleClick("asc")}
-					/>
-					<Button
-						id={"desc"}
-						type="submit"
-						text={"По убыванию"}
-						sorting={Direction.Descending}
-						name={"desc"}
-						value={"desc"}
-						isLoader={isLoading && sortingOrder === "desc"}
-						disabled={isLoading}
-						onClick={() => handleClick("desc")}
-					/>
+					<div
+						onClick={() => {
+							onClick("asc");
+						}}
+					>
+						<Button
+							id={"asc"}
+							type="submit"
+							text={"По возрастанию"}
+							sorting={Direction.Ascending}
+							name={"asc"}
+							value={"asc"}
+							isLoader={isLoader && sortType === "asc"}
+							disabled={isLoader}
+						></Button>
+					</div>
+					<div
+						onClick={() => {
+							onClick("desc");
+						}}
+					>
+						<Button
+							id={"desc"}
+							type="submit"
+							text={"По убыванию"}
+							sorting={Direction.Descending}
+							name={"desc"}
+							value={"desc"}
+							isLoader={isLoader && sortType === "desc"}
+							disabled={isLoader}
+						></Button>
+					</div>
 				</div>
 				<Button
 					type="submit"
 					text={"Новый массив"}
 					value={"newArray"}
-					onClick={() => handleClick("newArray")}
-					disabled={isLoading}
-				/>
+					onClick={() => {
+						onClick("newArray");
+					}}
+					disabled={isLoader}
+				></Button>
 			</form>
 			<div className={styles.animation}>
-				{animatedArray &&
-					animatedArray.map((item, index) => {
+				{arrayToAnimate &&
+					arrayToAnimate.map((item, index) => {
 						return (
 							<Column
 								key={index}
-								index={item["data"]}
-								state={item["state"]}
+								index={item.data}
+								state={item.state}
 							></Column>
 						);
 					})}

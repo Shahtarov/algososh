@@ -28,7 +28,7 @@ const getArrayToAnimate = (list: LinkedList<ILinkedItem>) => {
 	const listArray = list.toArray();
 	return listArray.map((item, index) => {
 		return (
-			<div key={index} className={styles.list_item}>
+			<li key={index} className={styles.list_item}>
 				<Circle
 					index={index}
 					letter={item["data"]}
@@ -56,12 +56,13 @@ const getArrayToAnimate = (list: LinkedList<ILinkedItem>) => {
 						) : null
 					}
 				></Circle>
+
 				{index !== listArray.length - 1 && (
 					<div className={styles.arrow}>
 						<ArrowIcon></ArrowIcon>
 					</div>
 				)}
-			</div>
+			</li>
 		);
 	});
 };
@@ -304,6 +305,7 @@ export const ListPage: FC = () => {
 							placeholder={"Введите значение"}
 							onChange={onChangeInput}
 							disabled={isLoader}
+							name="inputValue"
 							value={input}
 						></Input>
 					</div>
@@ -359,6 +361,7 @@ export const ListPage: FC = () => {
 							onChange={onChangeInputIdx}
 							style={{ minWidth: "20%" }}
 							disabled={isLoader}
+							name="inputIdx"
 							value={inputIdx}
 						></Input>
 					</div>
@@ -398,7 +401,7 @@ export const ListPage: FC = () => {
 					></Button>
 				</div>
 			</div>
-			<div className={styles.animation}>{getArrayToAnimate(list)}</div>
+			<ul className={styles.animation}>{getArrayToAnimate(list)}</ul>
 		</SolutionLayout>
 	);
 };

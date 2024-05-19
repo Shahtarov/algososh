@@ -1,88 +1,52 @@
-import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { SortingPage } from "./sorting-page";
-import { Direction } from "../../types/direction";
-import { MemoryRouter } from "react-router-dom";
+import { sortAlgo } from "./sorting-page";
+import { ElementStates } from "../../types/element-states";
 
-describe("SortingPage", () => {
-	const generateArray = (array: number[]) => {
-		jest.spyOn(Math, "random").mockImplementation(() => array.shift()! / 100);
-	};
+describe("Sorting page", () => {
+	it("Empty array", () => {
+		const input: { data: number; state: ElementStates }[] = [].map((item) => {
+			return { data: item, state: ElementStates.Default };
+		});
 
-	afterEach(() => {
-		jest.restoreAllMocks();
+		expect(sortAlgo(input, "bubble", "asc")).toEqual(input);
+		expect(sortAlgo(input, "bubble", "desc")).toEqual(input);
+		expect(sortAlgo(input, "selection", "asc")).toEqual(input);
+		expect(sortAlgo(input, "selection", "desc")).toEqual(input);
 	});
 
-	test("correctly sorts an empty array", () => {
-		generateArray([]);
-		render(
-			<MemoryRouter>
-				<SortingPage />
-			</MemoryRouter>
-		);
+	it("Array with one element", () => {
+		const input: { data: number; state: ElementStates }[] = [
+			{ data: 1, state: ElementStates.Default }
+		];
 
-		const newArrayButton = screen.getByText(/Новый массив/i);
-		fireEvent.click(newArrayButton);
-
-		const columns = screen.queryAllByTestId("column");
-		expect(columns).toHaveLength(0);
+		expect(sortAlgo(input, "bubble", "asc")).toEqual(input);
+		expect(sortAlgo(input, "bubble", "desc")).toEqual(input);
+		expect(sortAlgo(input, "selection", "asc")).toEqual(input);
+		expect(sortAlgo(input, "selection", "desc")).toEqual(input);
 	});
 
-	test("correctly sorts an array with one element", () => {
-		generateArray([42]);
-		render(
-			<MemoryRouter>
-				<SortingPage />
-			</MemoryRouter>
-		);
-		const newArrayButton = screen.getByText(/Новый массив/i);
-		fireEvent.click(newArrayButton);
+	it("Array with multiple elements", () => {
+		const input: { data: number; state: ElementStates }[] = [
+			{ data: 1, state: ElementStates.Default },
+			{ data: 5, state: ElementStates.Default },
+			{ data: 10, state: ElementStates.Default },
+			{ data: -1, state: ElementStates.Default }
+		];
+		const answerAsc: { data: number; state: ElementStates }[] = [
+			{ data: -1, state: ElementStates.Default },
+			{ data: 1, state: ElementStates.Default },
+			{ data: 5, state: ElementStates.Default },
+			{ data: 10, state: ElementStates.Default }
+		];
+		const answerDesc: { data: number; state: ElementStates }[] = [
+			{ data: 10, state: ElementStates.Default },
+			{ data: 5, state: ElementStates.Default },
+			{ data: 1, state: ElementStates.Default },
+			{ data: -1, state: ElementStates.Default }
+		];
 
-		const ascButton = screen.getByText(/По возрастанию/i);
-		fireEvent.click(ascButton);
-
-		const columns = screen.getAllByTestId("column");
-		expect(columns).toHaveLength(1);
-		expect(columns[0]).toHaveTextContent("42");
-	});
-
-	test("correctly sorts an array with multiple elements", async () => {
-		generateArray([4, 3, 2, 1]);
-		render(
-			<MemoryRouter>
-				<SortingPage />
-			</MemoryRouter>
-		);
-
-		const newArrayButton = screen.getByText(/Новый массив/i);
-		fireEvent.click(newArrayButton);
-
-		const ascButton = screen.getByText(/По возрастанию/i);
-		fireEvent.click(ascButton);
-
-		await waitFor(() => {
-			const columns = screen.getAllByTestId("column");
-			expect(columns).toHaveLength(4);
-		});
-
-		await waitFor(() => {
-			const columns = screen.getAllByTestId("column");
-			expect(columns[0]).toHaveTextContent("1");
-		});
-
-		await waitFor(() => {
-			const columns = screen.getAllByTestId("column");
-			expect(columns[1]).toHaveTextContent("2");
-		});
-
-		await waitFor(() => {
-			const columns = screen.getAllByTestId("column");
-			expect(columns[2]).toHaveTextContent("3");
-		});
-
-		await waitFor(() => {
-			const columns = screen.getAllByTestId("column");
-			expect(columns[3]).toHaveTextContent("4");
-		});
+		expect(sortAlgo(input, "bubble", "asc")).toEqual(answerAsc);
+		expect(sortAlgo(input, "bubble", "desc")).toEqual(answerDesc);
+		expect(sortAlgo(input, "selection", "asc")).toEqual(answerAsc);
+		expect(sortAlgo(input, "selection", "desc")).toEqual(answerDesc);
 	});
 });
