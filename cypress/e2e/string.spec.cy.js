@@ -14,7 +14,7 @@ describe("String component", function () {
 	});
 
 	it("Revers string", function () {
-		const inputValue = "12345";
+		const inputValue = "1234";
 
 		cy.get("input").as("currInput");
 		cy.get("@currInput").type(inputValue);

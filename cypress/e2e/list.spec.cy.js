@@ -1,12 +1,11 @@
 import {
 	elStateColors,
-	findCircle,
-	findCircleArr,
-	findCircleSmall
+	testCircleArr,
+	testCircleSmall
 } from "../../src/constants/constants";
 import { SHORT_DELAY_IN_MS } from "../../src/constants/delays";
 
-describe("List component", function () {
+describe("Связный список: проверка компонентов", function () {
 	beforeEach(function () {
 		cy.visit("http://localhost:3000/list");
 		cy.contains("Добавить в head").as("btnAddHead");
@@ -16,7 +15,7 @@ describe("List component", function () {
 		cy.contains("Добавить по индексу").as("btnAddIndex");
 		cy.contains("Удалить по индексу").as("btnDeleteIndex");
 		cy.get('input[name="inputValue"]').as("inputValue");
-		cy.get('input[name="inputIdx"]').as("inputIndex");
+		cy.get('input[name="inputIndex"]').as("inputIndex");
 	});
 
 	it("Если в инпуте пусто, то кнопки добавления и кнопка удаления по индексу недоступны", function () {
@@ -32,33 +31,33 @@ describe("List component", function () {
 	});
 
 	it("Корректность отрисовки дефолтного списка", function () {
-		cy.get(findCircle)
+		cy.get(testCircle)
 			.should("have.length.gte", 2)
 			.and("have.length.lte", 6)
 			.each((value) => {
 				cy.wrap(value).should("have.css", "border", elStateColors.default);
 			});
-		cy.get(findCircle).first().siblings().contains("head");
-		cy.get(findCircle).last().siblings().contains("tail");
+		cy.get(testCircle).first().siblings().contains("head");
+		cy.get(testCircle).last().siblings().contains("tail");
 	});
 
 	it("Корректность добавления элемента в head", function () {
 		cy.get("@inputValue").type("5555");
 		cy.get("@btnAddHead").click();
-		cy.get(findCircleArr)
+		cy.get(testCircleArr)
 			.first()
-			.find(findCircleSmall)
+			.find(testCircleSmall)
 			.should("have.text", "5555")
 			.and("have.css", "border", elStateColors.changing);
 		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(findCircle)
+		cy.get(testCircle)
 			.first()
 			.should("have.text", "5555")
 			.and("have.css", "border", elStateColors.modified)
 			.siblings()
 			.contains("head");
 		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(findCircle)
+		cy.get(testCircle)
 			.first()
 			.should("have.text", "5555")
 			.and("have.css", "border", elStateColors.default);
@@ -67,20 +66,20 @@ describe("List component", function () {
 	it("Корректность добавления элемента в tail", function () {
 		cy.get("@inputValue").type("5555");
 		cy.get("@btnAddTail").click();
-		cy.get(findCircleArr)
+		cy.get(testCircleArr)
 			.last()
-			.find(findCircleSmall)
+			.find(testCircleSmall)
 			.should("have.text", "5555")
 			.and("have.css", "border", elStateColors.changing);
 		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(findCircle)
+		cy.get(testCircle)
 			.last()
 			.should("have.text", "5555")
 			.and("have.css", "border", elStateColors.modified)
 			.siblings()
 			.contains("tail");
 		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(findCircle)
+		cy.get(testCircle)
 			.last()
 			.should("have.text", "5555")
 			.and("have.css", "border", elStateColors.default);
@@ -91,24 +90,24 @@ describe("List component", function () {
 		cy.get("@inputIndex").type("1");
 		cy.get("@btnAddIndex").click();
 
-		cy.get(findCircleArr)
+		cy.get(testCircleArr)
 			.first()
-			.find(findCircleSmall)
+			.find(testCircleSmall)
 			.should("have.text", "indx")
 			.and("have.css", "border", elStateColors.changing);
 		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(findCircleArr)
+		cy.get(testCircleArr)
 			.eq(1)
-			.find(findCircleSmall)
+			.find(testCircleSmall)
 			.should("have.text", "indx")
 			.and("have.css", "border", elStateColors.changing);
 		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(findCircle)
+		cy.get(testCircle)
 			.eq(1)
 			.should("have.text", "indx")
 			.and("have.css", "border", elStateColors.modified);
 		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(findCircle)
+		cy.get(testCircle)
 			.eq(1)
 			.should("have.text", "indx")
 			.and("have.css", "border", elStateColors.default);
@@ -119,13 +118,13 @@ describe("List component", function () {
 		cy.get("@btnAddHead").click();
 		cy.get("@btnDeleteHead").click();
 
-		cy.get(findCircleArr)
+		cy.get(testCircleArr)
 			.first()
-			.find(findCircleSmall)
+			.find(testCircleSmall)
 			.should("have.text", "5555")
 			.and("have.css", "border", elStateColors.changing);
 		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(findCircleArr).first().should("not.have.text", "5555");
+		cy.get(testCircleArr).first().should("not.have.text", "5555");
 	});
 
 	it("Корректность удаления элемента из tail", function () {
@@ -133,13 +132,13 @@ describe("List component", function () {
 		cy.get("@btnAddTail").click();
 		cy.get("@btnDeleteTail").click();
 
-		cy.get(findCircleArr)
+		cy.get(testCircleArr)
 			.last()
-			.find(findCircleSmall)
+			.find(testCircleSmall)
 			.should("have.text", "5555")
 			.and("have.css", "border", elStateColors.changing);
 		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(findCircleArr).last().should("not.have.text", "5555");
+		cy.get(testCircleArr).last().should("not.have.text", "5555");
 	});
 
 	it("Корректность удаления элемента по индексу", function () {
@@ -150,7 +149,7 @@ describe("List component", function () {
 		cy.get("@inputIndex").type("2");
 		cy.get("@btnDeleteIndex").click();
 
-		cy.get(findCircle).each((value, index) => {
+		cy.get(testCircle).each((value, index) => {
 			index < 2
 				? cy
 						.wrap(value)
@@ -162,14 +161,14 @@ describe("List component", function () {
 
 		cy.wait(SHORT_DELAY_IN_MS);
 
-		cy.get(findCircleArr)
+		cy.get(testCircleArr)
 			.eq(2)
-			.find(findCircleSmall)
+			.find(testCircleSmall)
 			.should("have.css", "border", elStateColors.changing)
 			.and("have.text", "indx");
 
 		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(findCircle)
+		cy.get(testCircle)
 			.eq(2)
 			.should("have.css", "border", elStateColors.default)
 			.and("not.have.text", "indx");
