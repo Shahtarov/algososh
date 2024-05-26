@@ -4,7 +4,7 @@ import { findCircle } from "../../src/constants/constants";
 
 describe("Stack component", function () {
 	beforeEach(function () {
-		cy.visit("http://localhost:3000/stack");
+		cy.visit("stack");
 		cy.contains("Добавить").as("btnAdd");
 		cy.contains("Удалить").as("btnDelete");
 		cy.contains("Очистить").as("btnReset");

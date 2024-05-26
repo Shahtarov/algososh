@@ -1,14 +1,15 @@
-const ADD = '[data-testid="add"]';
-const DELETE = '[data-testid="delete"]';
-const CLEAR = '[data-testid="clear"]';
-
-const RESULT = '[data-testid="result"]';
-const INPUT = '[data-testid="input"]';
-const CIRCLE = 'div[class*="circle_circle"]';
+import {
+	ADD,
+	DELETE,
+	CLEAR,
+	RESULT,
+	INPUT,
+	findCircle
+} from "../../src/constants/constants";
 
 describe("Queue component", function () {
 	beforeEach(function () {
-		cy.visit("http://localhost:3000/queue");
+		cy.visit("queue");
 	});
 
 	it("buttons disabled", function () {
@@ -35,13 +36,13 @@ describe("Queue component", function () {
 			.children()
 			.each(($el, index) => {
 				cy.wrap($el)
-					.find(CIRCLE)
+					.find(findCircle)
 					.invoke("text")
 					.should("eq", result[index]);
 
 				const toMatch = index === 0 ? /changing/ : /default/;
 				cy.wrap($el)
-					.find(CIRCLE)
+					.find(findCircle)
 					.invoke("attr", "class")
 					.then((className) => {
 						expect(className).to.match(toMatch);
@@ -53,12 +54,12 @@ describe("Queue component", function () {
 			.children()
 			.each(($el, index) => {
 				cy.wrap($el)
-					.find(CIRCLE)
+					.find(findCircle)
 					.invoke("text")
 					.should("eq", result[index]);
 
 				cy.wrap($el)
-					.find(CIRCLE)
+					.find(findCircle)
 					.invoke("attr", "class")
 					.then((className) => {
 						expect(className).to.match(/default/);
@@ -81,12 +82,12 @@ describe("Queue component", function () {
 			.children()
 			.each(($el, index) => {
 				cy.wrap($el)
-					.find(CIRCLE)
+					.find(findCircle)
 					.invoke("text")
 					.should("eq", result[index]);
 
 				cy.wrap($el)
-					.find(CIRCLE)
+					.find(findCircle)
 					.invoke("attr", "class")
 					.then((className) => {
 						expect(className).to.match(/default/);
@@ -115,12 +116,12 @@ describe("Queue component", function () {
 			.children()
 			.each(($el, index) => {
 				cy.wrap($el)
-					.find(CIRCLE)
+					.find(findCircle)
 					.invoke("text")
 					.should("eq", result[index]);
 
 				cy.wrap($el)
-					.find(CIRCLE)
+					.find(findCircle)
 					.invoke("attr", "class")
 					.then((className) => {
 						expect(className).to.match(/default/);

@@ -1,17 +1,19 @@
-const VALUE = '[data-testid="input"]';
-const INDEX = '[data-testid="index"]';
-
-const ADD_TO_HEAD = '[data-testid="add-to-head"]';
-const ADD_TO_TAIL = '[data-testid="add-to-tail"]';
-const ADD_BY_INDEX = '[data-testid="add-by-index"]';
-
-const DELETE_FROM_HEAD = '[data-testid="delete-from-head"]';
-const DELETE_FROM_TAIL = '[data-testid="delete-from-tail"]';
-const DELETE_BY_INDEX = '[data-testid="delete-by-index"]';
+import {
+	RESULT,
+	INPUT,
+	INDEX,
+	ADD_TO_HEAD,
+	ADD_TO_TAIL,
+	ADD_BY_INDEX,
+	DELETE_FROM_HEAD,
+	DELETE_FROM_TAIL,
+	DELETE_BY_INDEX,
+	findCircle
+} from "../../src/constants/constants";
 
 describe("List component", function () {
 	beforeEach(function () {
-		cy.visit("http://localhost:3000/list");
+		cy.visit("list");
 	});
 
 	it("buttons disabled", function () {
@@ -20,7 +22,7 @@ describe("List component", function () {
 		cy.get(ADD_BY_INDEX).should("be.disabled");
 		cy.get(DELETE_BY_INDEX).should("be.disabled");
 
-		cy.get(VALUE).type(1234);
+		cy.get(INPUT).type(1234);
 		cy.get(ADD_TO_HEAD).should("not.be.disabled");
 		cy.get(ADD_TO_TAIL).should("not.be.disabled");
 
@@ -30,7 +32,7 @@ describe("List component", function () {
 	});
 
 	it("default input", function () {
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
 			.should("have.length.greaterThan", 4)
 			.and("have.length.lessThan", 10);
@@ -39,21 +41,21 @@ describe("List component", function () {
 	it("add to head", function () {
 		const testInput = "7";
 
-		cy.get('[data-testid="input"]').type(testInput);
+		cy.get(INPUT).type(testInput);
 		cy.get(ADD_TO_HEAD).click();
 
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
 			.first()
-			.find('div[class*="circle_circle"]')
+			.find(findCircle)
 			.first()
 			.invoke("text")
 			.should("eq", testInput);
 
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
 			.first()
-			.find('div[class*="circle_circle"]')
+			.find(findCircle)
 			.first()
 			.invoke("attr", "class")
 			.then((className) => {
@@ -61,18 +63,18 @@ describe("List component", function () {
 			});
 		cy.wait(500);
 
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
 			.first()
-			.find('div[class*="circle_circle"]')
+			.find(findCircle)
 			.invoke("text")
 			.should("eq", testInput);
 
 		cy.wait(500);
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
 			.first()
-			.find('div[class*="circle_circle"]')
+			.find(findCircle)
 			.invoke("attr", "class")
 			.then((className) => {
 				expect(className).to.match(/default/);
@@ -82,21 +84,21 @@ describe("List component", function () {
 	it("add to tail", function () {
 		const testInput = "5";
 
-		cy.get('[data-testid="input"]').type(testInput);
+		cy.get(INPUT).type(testInput);
 		cy.get(ADD_TO_TAIL).click();
 
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
 			.last()
-			.find('div[class*="circle_circle"]')
+			.find(findCircle)
 			.last()
 			.invoke("text")
 			.should("eq", testInput);
 
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
 			.last()
-			.find('div[class*="circle_circle"]')
+			.find(findCircle)
 			.last()
 			.invoke("attr", "class")
 			.then((className) => {
@@ -104,18 +106,18 @@ describe("List component", function () {
 			});
 		cy.wait(500);
 
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
 			.last()
-			.find('div[class*="circle_circle"]')
+			.find(findCircle)
 			.invoke("text")
 			.should("eq", testInput);
 
 		cy.wait(500);
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
 			.last()
-			.find('div[class*="circle_circle"]')
+			.find(findCircle)
 			.invoke("attr", "class")
 			.then((className) => {
 				expect(className).to.match(/default/);
@@ -126,22 +128,22 @@ describe("List component", function () {
 		const testInput = "5";
 		const testIdxInput = 1;
 
-		cy.get('[data-testid="input"]').type(testInput);
+		cy.get(INPUT).type(testInput);
 		cy.get(INDEX).eq(0).type(testIdxInput);
 		cy.get(ADD_BY_INDEX).click();
 
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
 			.first()
-			.find('div[class*="circle_circle"]')
+			.find(findCircle)
 			.first()
 			.invoke("text")
 			.should("eq", testInput);
 
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
 			.first()
-			.find('div[class*="circle_circle"]')
+			.find(findCircle)
 			.first()
 			.invoke("attr", "class")
 			.then((className) => {
@@ -149,9 +151,9 @@ describe("List component", function () {
 			});
 		cy.wait(500);
 
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
-			.find('div[class*="circle_circle"]')
+			.find(findCircle)
 			.each(($el, index) => {
 				if (index === testIdxInput) {
 					cy.wrap($el).invoke("text").should("eq", testInput);
@@ -164,9 +166,9 @@ describe("List component", function () {
 			});
 		cy.wait(500);
 
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
-			.find('div[class*="circle_circle"]')
+			.find(findCircle)
 			.each(($el, index) => {
 				if (index === testIdxInput) {
 					cy.wrap($el).invoke("text").should("eq", testInput);
@@ -179,9 +181,9 @@ describe("List component", function () {
 			});
 		cy.wait(500);
 
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
-			.find('div[class*="circle_circle"]')
+			.find(findCircle)
 			.each(($el, index) => {
 				if (index === testIdxInput) {
 					cy.wrap($el).invoke("text").should("eq", testInput);
@@ -197,18 +199,18 @@ describe("List component", function () {
 	it("delete from head", function () {
 		cy.get(DELETE_FROM_HEAD).click();
 
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
 			.first()
-			.find('div[class*="circle_circle"]')
+			.find(findCircle)
 			.first()
 			.invoke("text")
 			.should("eq", "");
 
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
 			.first()
-			.find('div[class*="circle_circle"]')
+			.find(findCircle)
 			.last()
 			.invoke("attr", "class")
 			.then((className) => {
@@ -219,18 +221,18 @@ describe("List component", function () {
 	it("check delete-from-tail animation", function () {
 		cy.get(DELETE_FROM_TAIL).click();
 
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
 			.last()
-			.find('div[class*="circle_circle"]')
+			.find(findCircle)
 			.first()
 			.invoke("text")
 			.should("eq", "");
 
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
 			.last()
-			.find('div[class*="circle_circle"]')
+			.find(findCircle)
 			.last()
 			.invoke("attr", "class")
 			.then((className) => {
@@ -246,10 +248,10 @@ describe("List component", function () {
 
 		cy.wait(500);
 
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
 			.first()
-			.find('div[class*="circle_circle"]')
+			.find(findCircle)
 			.first()
 			.invoke("attr", "class")
 			.then((className) => {
@@ -257,9 +259,9 @@ describe("List component", function () {
 			});
 		cy.wait(500);
 
-		cy.get('[data-testid="result"]')
+		cy.get(RESULT)
 			.children()
-			.find('div[class*="circle_circle"]')
+			.find(findCircle)
 			.each(($el, index) => {
 				if (index === testIdxInput) {
 					cy.wrap($el)

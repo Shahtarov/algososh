@@ -4,7 +4,7 @@ import { findCircle } from "../../src/constants/constants";
 
 describe("String component", function () {
 	beforeEach(function () {
-		cy.visit("http://localhost:3000/recursion");
+		cy.visit("recursion");
 	});
 
 	it("Empty input", function () {

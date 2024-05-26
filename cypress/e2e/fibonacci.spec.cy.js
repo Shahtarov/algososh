@@ -3,7 +3,7 @@ import { findCircle } from "../../src/constants/constants";
 
 describe("Component Fibonacci", function () {
 	beforeEach(function () {
-		cy.visit("http://localhost:3000/fibonacci");
+		cy.visit("fibonacci");
 	});
 
 	it("Empty input", function () {
