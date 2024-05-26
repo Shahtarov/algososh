@@ -23,10 +23,19 @@ export const QueuePage: FC = () => {
 	const [queue] = useState(new Queue<IQueueItem>(7));
 	const [activeButton, setActiveButton] = useState<string | null>(null);
 	const [inputValue, setInputValue] = useState("");
+	const [isAddButtonDisabled, setIsAddButtonDisabled] = useState(true);
 
 	useEffect(() => {
 		setArray([...queue.elements()]);
 	}, [queue]);
+
+	useEffect(() => {
+		if (inputValue.length >= 1 && inputValue.length <= 4) {
+			setIsAddButtonDisabled(false);
+		} else {
+			setIsAddButtonDisabled(true);
+		}
+	}, [inputValue]);
 
 	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -88,13 +97,15 @@ export const QueuePage: FC = () => {
 						value={inputValue}
 						name="inputValue"
 						disabled={loader}
+						data-testid="input"
 					/>
 
 					<Button
 						text="Добавить"
-						disabled={loader || queue.tail === 7}
+						disabled={loader || queue.tail === 7 || isAddButtonDisabled}
 						type="submit"
 						isLoader={loader && activeButton === "add"}
+						data-testid="add"
 					/>
 					<Button
 						text="Удалить"
@@ -102,6 +113,7 @@ export const QueuePage: FC = () => {
 						onClick={handleRemove}
 						type="button"
 						isLoader={loader && activeButton === "remove"}
+						data-testid="delete"
 					/>
 				</div>
 				<Button
@@ -112,9 +124,10 @@ export const QueuePage: FC = () => {
 					}
 					onClick={handleReset}
 					isLoader={loader && activeButton === "clear"}
+					data-testid="clear"
 				/>
 			</form>
-			<ul className={styles.animation}>
+			<ul className={styles.animation} data-testid="result">
 				{array.map((item, index) => (
 					<li key={index}>
 						<Circle

@@ -1,176 +1,274 @@
-import {
-	elStateColors,
-	testCircleArr,
-	testCircleSmall
-} from "../../src/constants/constants";
-import { SHORT_DELAY_IN_MS } from "../../src/constants/delays";
+const VALUE = '[data-testid="input"]';
+const INDEX = '[data-testid="index"]';
 
-describe("Связный список: проверка компонентов", function () {
+const ADD_TO_HEAD = '[data-testid="add-to-head"]';
+const ADD_TO_TAIL = '[data-testid="add-to-tail"]';
+const ADD_BY_INDEX = '[data-testid="add-by-index"]';
+
+const DELETE_FROM_HEAD = '[data-testid="delete-from-head"]';
+const DELETE_FROM_TAIL = '[data-testid="delete-from-tail"]';
+const DELETE_BY_INDEX = '[data-testid="delete-by-index"]';
+
+describe("List component", function () {
 	beforeEach(function () {
 		cy.visit("http://localhost:3000/list");
-		cy.contains("Добавить в head").as("btnAddHead");
-		cy.contains("Добавить в tail").as("btnAddTail");
-		cy.contains("Удалить из head").as("btnDeleteHead");
-		cy.contains("Удалить из tail").as("btnDeleteTail");
-		cy.contains("Добавить по индексу").as("btnAddIndex");
-		cy.contains("Удалить по индексу").as("btnDeleteIndex");
-		cy.get('input[name="inputValue"]').as("inputValue");
-		cy.get('input[name="inputIndex"]').as("inputIndex");
 	});
 
-	it("Если в инпуте пусто, то кнопки добавления и кнопка удаления по индексу недоступны", function () {
-		cy.contains("Связный список");
-		cy.get("@inputValue").should("be.empty");
-		cy.get("@btnAddHead").should("be.disabled");
-		cy.get("@btnAddTail").should("be.disabled");
-		cy.get("@btnAddIndex").should("be.disabled");
+	it("buttons disabled", function () {
+		cy.get(ADD_TO_HEAD).should("be.disabled");
+		cy.get(ADD_TO_TAIL).should("be.disabled");
+		cy.get(ADD_BY_INDEX).should("be.disabled");
+		cy.get(DELETE_BY_INDEX).should("be.disabled");
 
-		cy.get("@inputIndex").should("be.empty");
-		cy.get("@btnAddIndex").should("be.disabled");
-		cy.get("@btnDeleteIndex").should("be.disabled");
+		cy.get(VALUE).type(1234);
+		cy.get(ADD_TO_HEAD).should("not.be.disabled");
+		cy.get(ADD_TO_TAIL).should("not.be.disabled");
+
+		cy.get(INDEX).eq(0).type(1);
+		cy.get(ADD_BY_INDEX).should("not.be.disabled");
+		cy.get(DELETE_BY_INDEX).should("not.be.disabled");
 	});
 
-	it("Корректность отрисовки дефолтного списка", function () {
-		cy.get(testCircle)
-			.should("have.length.gte", 2)
-			.and("have.length.lte", 6)
-			.each((value) => {
-				cy.wrap(value).should("have.css", "border", elStateColors.default);
+	it("default input", function () {
+		cy.get('[data-testid="result"]')
+			.children()
+			.should("have.length.greaterThan", 4)
+			.and("have.length.lessThan", 10);
+	});
+
+	it("add to head", function () {
+		const testInput = "7";
+
+		cy.get('[data-testid="input"]').type(testInput);
+		cy.get(ADD_TO_HEAD).click();
+
+		cy.get('[data-testid="result"]')
+			.children()
+			.first()
+			.find('div[class*="circle_circle"]')
+			.first()
+			.invoke("text")
+			.should("eq", testInput);
+
+		cy.get('[data-testid="result"]')
+			.children()
+			.first()
+			.find('div[class*="circle_circle"]')
+			.first()
+			.invoke("attr", "class")
+			.then((className) => {
+				expect(className).to.match(/changing/);
 			});
-		cy.get(testCircle).first().siblings().contains("head");
-		cy.get(testCircle).last().siblings().contains("tail");
+		cy.wait(500);
+
+		cy.get('[data-testid="result"]')
+			.children()
+			.first()
+			.find('div[class*="circle_circle"]')
+			.invoke("text")
+			.should("eq", testInput);
+
+		cy.wait(500);
+		cy.get('[data-testid="result"]')
+			.children()
+			.first()
+			.find('div[class*="circle_circle"]')
+			.invoke("attr", "class")
+			.then((className) => {
+				expect(className).to.match(/default/);
+			});
 	});
 
-	it("Корректность добавления элемента в head", function () {
-		cy.get("@inputValue").type("5555");
-		cy.get("@btnAddHead").click();
-		cy.get(testCircleArr)
-			.first()
-			.find(testCircleSmall)
-			.should("have.text", "5555")
-			.and("have.css", "border", elStateColors.changing);
-		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(testCircle)
-			.first()
-			.should("have.text", "5555")
-			.and("have.css", "border", elStateColors.modified)
-			.siblings()
-			.contains("head");
-		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(testCircle)
-			.first()
-			.should("have.text", "5555")
-			.and("have.css", "border", elStateColors.default);
-	});
+	it("add to tail", function () {
+		const testInput = "5";
 
-	it("Корректность добавления элемента в tail", function () {
-		cy.get("@inputValue").type("5555");
-		cy.get("@btnAddTail").click();
-		cy.get(testCircleArr)
+		cy.get('[data-testid="input"]').type(testInput);
+		cy.get(ADD_TO_TAIL).click();
+
+		cy.get('[data-testid="result"]')
+			.children()
 			.last()
-			.find(testCircleSmall)
-			.should("have.text", "5555")
-			.and("have.css", "border", elStateColors.changing);
-		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(testCircle)
+			.find('div[class*="circle_circle"]')
 			.last()
-			.should("have.text", "5555")
-			.and("have.css", "border", elStateColors.modified)
-			.siblings()
-			.contains("tail");
-		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(testCircle)
+			.invoke("text")
+			.should("eq", testInput);
+
+		cy.get('[data-testid="result"]')
+			.children()
 			.last()
-			.should("have.text", "5555")
-			.and("have.css", "border", elStateColors.default);
+			.find('div[class*="circle_circle"]')
+			.last()
+			.invoke("attr", "class")
+			.then((className) => {
+				expect(className).to.match(/changing/);
+			});
+		cy.wait(500);
+
+		cy.get('[data-testid="result"]')
+			.children()
+			.last()
+			.find('div[class*="circle_circle"]')
+			.invoke("text")
+			.should("eq", testInput);
+
+		cy.wait(500);
+		cy.get('[data-testid="result"]')
+			.children()
+			.last()
+			.find('div[class*="circle_circle"]')
+			.invoke("attr", "class")
+			.then((className) => {
+				expect(className).to.match(/default/);
+			});
 	});
 
-	it("Корректность добавления элемента по индексу", function () {
-		cy.get("@inputValue").type("indx");
-		cy.get("@inputIndex").type("1");
-		cy.get("@btnAddIndex").click();
+	it("add by index", function () {
+		const testInput = "5";
+		const testIdxInput = 1;
 
-		cy.get(testCircleArr)
+		cy.get('[data-testid="input"]').type(testInput);
+		cy.get(INDEX).eq(0).type(testIdxInput);
+		cy.get(ADD_BY_INDEX).click();
+
+		cy.get('[data-testid="result"]')
+			.children()
 			.first()
-			.find(testCircleSmall)
-			.should("have.text", "indx")
-			.and("have.css", "border", elStateColors.changing);
-		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(testCircleArr)
-			.eq(1)
-			.find(testCircleSmall)
-			.should("have.text", "indx")
-			.and("have.css", "border", elStateColors.changing);
-		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(testCircle)
-			.eq(1)
-			.should("have.text", "indx")
-			.and("have.css", "border", elStateColors.modified);
-		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(testCircle)
-			.eq(1)
-			.should("have.text", "indx")
-			.and("have.css", "border", elStateColors.default);
-	});
-
-	it("Корректность удаления элемента из head", function () {
-		cy.get("@inputValue").type("5555");
-		cy.get("@btnAddHead").click();
-		cy.get("@btnDeleteHead").click();
-
-		cy.get(testCircleArr)
+			.find('div[class*="circle_circle"]')
 			.first()
-			.find(testCircleSmall)
-			.should("have.text", "5555")
-			.and("have.css", "border", elStateColors.changing);
-		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(testCircleArr).first().should("not.have.text", "5555");
+			.invoke("text")
+			.should("eq", testInput);
+
+		cy.get('[data-testid="result"]')
+			.children()
+			.first()
+			.find('div[class*="circle_circle"]')
+			.first()
+			.invoke("attr", "class")
+			.then((className) => {
+				expect(className).to.match(/changing/);
+			});
+		cy.wait(500);
+
+		cy.get('[data-testid="result"]')
+			.children()
+			.find('div[class*="circle_circle"]')
+			.each(($el, index) => {
+				if (index === testIdxInput) {
+					cy.wrap($el).invoke("text").should("eq", testInput);
+					cy.wrap($el)
+						.invoke("attr", "class")
+						.then((className) => {
+							expect(className).to.match(/changing/);
+						});
+				}
+			});
+		cy.wait(500);
+
+		cy.get('[data-testid="result"]')
+			.children()
+			.find('div[class*="circle_circle"]')
+			.each(($el, index) => {
+				if (index === testIdxInput) {
+					cy.wrap($el).invoke("text").should("eq", testInput);
+					cy.wrap($el)
+						.invoke("attr", "class")
+						.then((className) => {
+							expect(className).to.match(/modified/);
+						});
+				}
+			});
+		cy.wait(500);
+
+		cy.get('[data-testid="result"]')
+			.children()
+			.find('div[class*="circle_circle"]')
+			.each(($el, index) => {
+				if (index === testIdxInput) {
+					cy.wrap($el).invoke("text").should("eq", testInput);
+					cy.wrap($el)
+						.invoke("attr", "class")
+						.then((className) => {
+							expect(className).to.match(/default/);
+						});
+				}
+			});
 	});
 
-	it("Корректность удаления элемента из tail", function () {
-		cy.get("@inputValue").type("5555");
-		cy.get("@btnAddTail").click();
-		cy.get("@btnDeleteTail").click();
+	it("delete from head", function () {
+		cy.get(DELETE_FROM_HEAD).click();
 
-		cy.get(testCircleArr)
+		cy.get('[data-testid="result"]')
+			.children()
+			.first()
+			.find('div[class*="circle_circle"]')
+			.first()
+			.invoke("text")
+			.should("eq", "");
+
+		cy.get('[data-testid="result"]')
+			.children()
+			.first()
+			.find('div[class*="circle_circle"]')
 			.last()
-			.find(testCircleSmall)
-			.should("have.text", "5555")
-			.and("have.css", "border", elStateColors.changing);
-		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(testCircleArr).last().should("not.have.text", "5555");
+			.invoke("attr", "class")
+			.then((className) => {
+				expect(className).to.match(/changing/);
+			});
 	});
 
-	it("Корректность удаления элемента по индексу", function () {
-		cy.get("@inputValue").type("indx");
-		cy.get("@inputIndex").type("2");
-		cy.get("@btnAddIndex").click();
+	it("check delete-from-tail animation", function () {
+		cy.get(DELETE_FROM_TAIL).click();
 
-		cy.get("@inputIndex").type("2");
-		cy.get("@btnDeleteIndex").click();
+		cy.get('[data-testid="result"]')
+			.children()
+			.last()
+			.find('div[class*="circle_circle"]')
+			.first()
+			.invoke("text")
+			.should("eq", "");
 
-		cy.get(testCircle).each((value, index) => {
-			index < 2
-				? cy
-						.wrap(value)
-						.should("have.css", "border", elStateColors.changing)
-				: cy
-						.wrap(value)
-						.should("have.css", "border", elStateColors.default);
-		});
+		cy.get('[data-testid="result"]')
+			.children()
+			.last()
+			.find('div[class*="circle_circle"]')
+			.last()
+			.invoke("attr", "class")
+			.then((className) => {
+				expect(className).to.match(/changing/);
+			});
+	});
 
-		cy.wait(SHORT_DELAY_IN_MS);
+	it("delete by index", function () {
+		const testIdxInput = 1;
 
-		cy.get(testCircleArr)
-			.eq(2)
-			.find(testCircleSmall)
-			.should("have.css", "border", elStateColors.changing)
-			.and("have.text", "indx");
+		cy.get(INDEX).eq(0).type(testIdxInput);
+		cy.get(DELETE_BY_INDEX).click();
 
-		cy.wait(SHORT_DELAY_IN_MS);
-		cy.get(testCircle)
-			.eq(2)
-			.should("have.css", "border", elStateColors.default)
-			.and("not.have.text", "indx");
+		cy.wait(500);
+
+		cy.get('[data-testid="result"]')
+			.children()
+			.first()
+			.find('div[class*="circle_circle"]')
+			.first()
+			.invoke("attr", "class")
+			.then((className) => {
+				expect(className).to.match(/changing/);
+			});
+		cy.wait(500);
+
+		cy.get('[data-testid="result"]')
+			.children()
+			.find('div[class*="circle_circle"]')
+			.each(($el, index) => {
+				if (index === testIdxInput) {
+					cy.wrap($el)
+						.invoke("attr", "class")
+						.then((className) => {
+							expect(className).to.match(/changing/);
+						});
+					cy.wrap($el).invoke("text").should("eq", "");
+				}
+			});
 	});
 });

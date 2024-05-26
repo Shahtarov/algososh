@@ -5,9 +5,8 @@ import { Button } from "../ui/button/button";
 import { Circle } from "../ui/circle/circle";
 import { ElementStates } from "../../types/element-states";
 import { ArrowIcon } from "../ui/icons/arrow-icon";
-import { LinkedList } from "../../utils/linked-list";
-import { SHORT_DELAY_IN_MS } from "../../constants/delays";
 import styles from "./list-page.module.css";
+import { LinkedList } from "../../utils/linked-list";
 
 export const randomArr = (
 	minLen: number = 3,
@@ -17,18 +16,18 @@ export const randomArr = (
 	return Array.from({ length: length }, () => Math.floor(Math.random() * 100));
 };
 
-interface ILinkedItem {
+interface ILinkedLIstItem {
 	data: string;
 	state: ElementStates;
 	smallUpperData: string | null;
 	smallLowerData: string | null;
 }
 
-const getArrayToAnimate = (list: LinkedList<ILinkedItem>) => {
+const getArrayToAnimate = (list: LinkedList<ILinkedLIstItem>) => {
 	const listArray = list.toArray();
 	return listArray.map((item, index) => {
 		return (
-			<li key={index} className={styles.list_item}>
+			<div key={index} className={styles.list_item} data-testid="result">
 				<Circle
 					index={index}
 					letter={item["data"]}
@@ -56,13 +55,12 @@ const getArrayToAnimate = (list: LinkedList<ILinkedItem>) => {
 						) : null
 					}
 				></Circle>
-
 				{index !== listArray.length - 1 && (
 					<div className={styles.arrow}>
 						<ArrowIcon></ArrowIcon>
 					</div>
 				)}
-			</li>
+			</div>
 		);
 	});
 };
@@ -74,9 +72,9 @@ export const ListPage: FC = () => {
 	const [inputIdx, setInputIdx] = useState("");
 	const [direction, setDirection] = useState("");
 	const [i, setI] = useState(0);
-	const [list, setList] = useState<LinkedList<ILinkedItem>>(
-		new LinkedList<ILinkedItem>(
-			randomArr(4, 6).map((item: number): ILinkedItem => {
+	const [list, setList] = useState<LinkedList<ILinkedLIstItem>>(
+		new LinkedList<ILinkedLIstItem>(
+			randomArr(4, 6).map((item: number): ILinkedLIstItem => {
 				return {
 					data: item.toString(),
 					smallUpperData: null,
@@ -99,14 +97,14 @@ export const ListPage: FC = () => {
 		if (type === "index" && Number(inputIdx) === 0) {
 			type = "front";
 		} else {
-			if (type === "index" && Number(inputIdx) === list.size) {
+			if (type === "index" && Number(inputIdx) === list.size()) {
 				type = "back";
 			}
 		}
 
 		setDirection(type);
 		(document.getElementById("inputValue") as HTMLInputElement).value = "";
-		const newList = new LinkedList<ILinkedItem>(list.toArray());
+		const newList = new LinkedList<ILinkedLIstItem>(list.toArray());
 
 		if (type === "back" && newList.tail !== null) {
 			newList.tail.value.smallLowerData = input;
@@ -119,7 +117,7 @@ export const ListPage: FC = () => {
 			console.log("Error type");
 		}
 
-		setList(new LinkedList<ILinkedItem>(newList.toArray()));
+		setList(new LinkedList<ILinkedLIstItem>(newList.toArray()));
 		setIsLoder(true);
 		setAction("push");
 		setInput("");
@@ -129,7 +127,7 @@ export const ListPage: FC = () => {
 	const onClkickPop = (type: string) => {
 		setDirection(type);
 		if (type !== "index") {
-			const newList = new LinkedList<ILinkedItem>(list.toArray());
+			const newList = new LinkedList<ILinkedLIstItem>(list.toArray());
 
 			if (type === "back" && newList.tail !== null) {
 				newList.tail.value.smallLowerData = newList.tail.value.data;
@@ -143,7 +141,7 @@ export const ListPage: FC = () => {
 			} else {
 				console.log("Error type");
 			}
-			setList(new LinkedList<ILinkedItem>(newList.toArray()));
+			setList(new LinkedList<ILinkedLIstItem>(newList.toArray()));
 		} else {
 			setI(0);
 		}
@@ -155,9 +153,9 @@ export const ListPage: FC = () => {
 		const interval = setInterval(() => {
 			if (isLoader) {
 				if (action === "push" && direction !== "index") {
-					const newList = new LinkedList<ILinkedItem>(list.toArray());
+					const newList = new LinkedList<ILinkedLIstItem>(list.toArray());
 
-					let node: ILinkedItem | null = null;
+					let node: ILinkedLIstItem | null = null;
 					if (direction === "back" && newList.tail !== null) {
 						node = newList.tail.value;
 					} else if (direction === "front" && newList.head !== null) {
@@ -166,7 +164,7 @@ export const ListPage: FC = () => {
 						return;
 					}
 
-					const newItem: ILinkedItem = {
+					const newItem: ILinkedLIstItem = {
 						data:
 							node[
 								direction === "back"
@@ -187,9 +185,9 @@ export const ListPage: FC = () => {
 					} else {
 						newList.append(newItem);
 					}
-					setList(new LinkedList<ILinkedItem>(newList.toArray()));
+					setList(new LinkedList<ILinkedLIstItem>(newList.toArray()));
 				} else if (action === "push" && direction === "index") {
-					const array = new LinkedList<ILinkedItem>(
+					const array = new LinkedList<ILinkedLIstItem>(
 						list.toArray()
 					).toArray();
 
@@ -201,11 +199,11 @@ export const ListPage: FC = () => {
 						setAction("push2");
 					}
 					setI(i + 1);
-					setList(new LinkedList<ILinkedItem>(array));
+					setList(new LinkedList<ILinkedLIstItem>(array));
 				} else if (action === "push2") {
 					if (direction === "index") {
 						const idx = Number(inputIdx);
-						let newList = new LinkedList<ILinkedItem>(list.toArray());
+						let newList = new LinkedList<ILinkedLIstItem>(list.toArray());
 						const value = newList.toArray()[i]["smallUpperData"];
 						newList.addByIndex(idx, {
 							data: value ?? "",
@@ -224,11 +222,13 @@ export const ListPage: FC = () => {
 							};
 						});
 						setDirection("");
-						setList(new LinkedList<ILinkedItem>(array));
+						setList(new LinkedList<ILinkedLIstItem>(array));
 					} else {
-						const newList = new LinkedList<ILinkedItem>(list.toArray());
+						const newList = new LinkedList<ILinkedLIstItem>(
+							list.toArray()
+						);
 						setList(
-							new LinkedList<ILinkedItem>(
+							new LinkedList<ILinkedLIstItem>(
 								newList.toArray().map((item) => {
 									return { ...item, state: ElementStates.Default };
 								})
@@ -238,15 +238,15 @@ export const ListPage: FC = () => {
 					}
 				} else if (action === "pop" && direction !== "index") {
 					setAction(null);
-					const newList = new LinkedList<ILinkedItem>(list.toArray());
+					const newList = new LinkedList<ILinkedLIstItem>(list.toArray());
 					if (direction === "front") {
 						newList.deleteHead();
 					} else {
 						newList.deleteTail();
 					}
-					setList(new LinkedList<ILinkedItem>(newList.toArray()));
+					setList(new LinkedList<ILinkedLIstItem>(newList.toArray()));
 				} else if (action === "pop" && direction === "index") {
-					const array = new LinkedList<ILinkedItem>(
+					const array = new LinkedList<ILinkedLIstItem>(
 						list.toArray()
 					).toArray();
 					array[i]["state"] = ElementStates.Changing;
@@ -256,25 +256,25 @@ export const ListPage: FC = () => {
 					} else {
 						setI(i + 1);
 					}
-					setList(new LinkedList<ILinkedItem>(array));
+					setList(new LinkedList<ILinkedLIstItem>(array));
 				} else if (action === "pop2" && direction === "index") {
 					setAction("pop3");
-					const array = new LinkedList<ILinkedItem>(
+					const array = new LinkedList<ILinkedLIstItem>(
 						list.toArray()
 					).toArray();
 					const value = array[i]["data"];
 					array[i]["smallLowerData"] = value;
 					array[i]["state"] = ElementStates.Default;
 					array[i]["data"] = "";
-					setList(new LinkedList<ILinkedItem>(array));
+					setList(new LinkedList<ILinkedLIstItem>(array));
 				} else if (action === "pop3" && direction === "index") {
 					setAction(null);
 					setI(0);
 					const idx = Number(inputIdx);
-					const newList = new LinkedList<ILinkedItem>(list.toArray());
+					const newList = new LinkedList<ILinkedLIstItem>(list.toArray());
 					newList.deleteByIndex(idx);
 					setList(
-						new LinkedList<ILinkedItem>(
+						new LinkedList<ILinkedLIstItem>(
 							newList.toArray().map((item) => {
 								return { ...item, state: ElementStates.Default };
 							})
@@ -286,12 +286,12 @@ export const ListPage: FC = () => {
 					setIsLoder(false);
 				}
 			}
-		}, SHORT_DELAY_IN_MS);
+		}, 500);
 
 		return () => {
 			clearInterval(interval);
 		};
-	}, [isLoader, i, list, action, direction, inputIdx]);
+	}, [isLoader, i, list]);
 
 	return (
 		<SolutionLayout title="Связный список">
@@ -305,8 +305,8 @@ export const ListPage: FC = () => {
 							placeholder={"Введите значение"}
 							onChange={onChangeInput}
 							disabled={isLoader}
-							name="inputValue"
 							value={input}
+							data-testid="input"
 						></Input>
 					</div>
 					<Button
@@ -320,6 +320,7 @@ export const ListPage: FC = () => {
 							(isLoader && action !== "push" && direction !== "front") ||
 							!input
 						}
+						data-testid="add-to-head"
 					></Button>
 					<Button
 						type="button"
@@ -332,6 +333,7 @@ export const ListPage: FC = () => {
 							(isLoader && action !== "push" && direction !== "back") ||
 							!input
 						}
+						data-testid="add-to-tail"
 					></Button>
 					<Button
 						type="button"
@@ -340,7 +342,8 @@ export const ListPage: FC = () => {
 						isLoader={
 							isLoader && action === "pop" && direction === "front"
 						}
-						disabled={isLoader || !list.size}
+						disabled={isLoader || !list.size()}
+						data-testid="delete-from-head"
 					></Button>
 					<Button
 						type="button"
@@ -349,7 +352,8 @@ export const ListPage: FC = () => {
 						isLoader={
 							isLoader && action === "pop" && direction === "back"
 						}
-						disabled={isLoader || !list.size}
+						disabled={isLoader || !list.size()}
+						data-testid="delete-from-tail"
 					></Button>
 				</div>
 				<div className={styles.downButtons}>
@@ -361,8 +365,8 @@ export const ListPage: FC = () => {
 							onChange={onChangeInputIdx}
 							style={{ minWidth: "20%" }}
 							disabled={isLoader}
-							name="inputIdx"
 							value={inputIdx}
+							data-testid="index"
 						></Input>
 					</div>
 
@@ -374,14 +378,14 @@ export const ListPage: FC = () => {
 							isLoader && action === "push" && direction === "index"
 						}
 						disabled={
-							(isLoader && action !== "push" && direction === "index") ||
+							isLoader ||
 							!inputIdx ||
 							!input ||
-							!Number(input) ||
 							Number(inputIdx) < 0 ||
-							Number(inputIdx) > list.size
+							Number(inputIdx) > list.size() - 1
 						}
 						style={{ minWidth: "35%" }}
+						data-testid="add-by-index"
 					></Button>
 					<Button
 						type="button"
@@ -391,17 +395,17 @@ export const ListPage: FC = () => {
 							isLoader && action === "pop" && direction === "index"
 						}
 						disabled={
-							(isLoader && action !== "pop" && direction === "index") ||
+							isLoader ||
 							!inputIdx ||
-							!Number(inputIdx) ||
 							Number(inputIdx) < 0 ||
-							Number(inputIdx) >= list.size
+							Number(inputIdx) >= list.size()
 						}
 						style={{ minWidth: "35%" }}
+						data-testid="delete-by-index"
 					></Button>
 				</div>
 			</div>
-			<ul className={styles.animation}>{getArrayToAnimate(list)}</ul>
+			<div className={styles.animation}>{getArrayToAnimate(list)}</div>
 		</SolutionLayout>
 	);
 };
