@@ -1,4 +1,14 @@
-# Visualization of algorithms
+# Visualization of algorithms and tests (E2E and Unit)
+
+## technology stack
+
+-  React
+-  TypeScript
+-  Cypress
+-  jest
+-  react-testing-library
+
+---
 
 ## String
 
